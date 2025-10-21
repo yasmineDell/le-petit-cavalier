@@ -990,10 +990,10 @@
     </div>
 
     <script>
-        // Configuration - UPDATE THESE WITH YOUR ACTUAL INFORMATION
-        const WHATSAPP_NUMBER = "213551617114"; // Replace with your WhatsApp number
-        const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvgwnnve"; // Replace with your Formspree endpoint
-
+        // Configuration
+        const WHATSAPP_NUMBER = "213551617114";
+        const FORMSPREE_ENDPOINT = "https://formspree.io/f/xvgwnnve";
+    
         // Capacity management
         let currentCapacity = 3;
         const slots = [
@@ -1002,28 +1002,28 @@
             { time: '14:00', available: true, endTime: '16:00' },
             { time: '16:00', available: true, endTime: '18:00' }
         ];
-
+    
         function changeLanguage(lang) {
             // Update active button
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
-
+    
             // Update text content
             document.querySelectorAll('[data-fr]').forEach(element => {
                 if (element.getAttribute(`data-${lang}`)) {
                     element.textContent = element.getAttribute(`data-${lang}`);
                 }
             });
-
+    
             // Update select options
             document.querySelectorAll('select option').forEach(option => {
                 if (option.getAttribute(`data-${lang}`)) {
                     option.textContent = option.getAttribute(`data-${lang}`);
                 }
             });
-
+    
             // Update direction and language
             if (lang === 'ar') {
                 document.documentElement.dir = 'rtl';
@@ -1035,17 +1035,17 @@
                 document.body.classList.remove('rtl');
             }
         }
-
+    
         function toggleFAQ(element) {
             element.classList.toggle('active');
         }
-
+    
         function scrollToBooking() {
             document.getElementById('booking-section').scrollIntoView({ 
                 behavior: 'smooth' 
             });
         }
-
+    
         // WhatsApp Booking Function
         function bookViaWhatsApp(serviceType) {
             const services = {
@@ -1075,7 +1075,7 @@
                     en: "Group Lessons (2500 DZD)" 
                 }
             };
-
+    
             const currentLang = document.documentElement.lang;
             const serviceText = services[serviceType][currentLang] || services[serviceType]['fr'];
             
@@ -1086,7 +1086,7 @@
             
             window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
         }
-
+    
         function bookSlot(time) {
             const message = encodeURIComponent(
                 `Bonjour! Je souhaite réserver le créneau de ${time} pour une séance d'équitation.\n\n` +
@@ -1095,7 +1095,7 @@
             
             window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
         }
-
+    
         // Render time slots
         function renderSlots() {
             const container = document.getElementById('slotsContainer');
@@ -1119,7 +1119,7 @@
                 container.appendChild(slotElement);
             });
         }
-
+    
         function getTranslation(key, lang) {
             const translations = {
                 'available': { fr: 'Disponible', ar: 'متاح', en: 'Available' },
@@ -1127,7 +1127,7 @@
             };
             return translations[key][lang] || translations[key]['fr'];
         }
-
+    
         // Update capacity display
         function updateCapacityDisplay() {
             document.getElementById('liveCapacity').textContent = currentCapacity;
@@ -1160,8 +1160,8 @@
                 warning.style.borderColor = '#fcd34d';
             }
         }
-
-        // Form handling
+    
+        // Form handling - FIXED VERSION
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -1175,21 +1175,50 @@
                  'Sending...');
             btn.disabled = true;
             
-            // Simulate form submission (replace with actual Formspree submission)
-            setTimeout(() => {
+            // Create form data
+            const formData = new FormData(this);
+            
+            // Send to Formspree using fetch API
+            fetch(FORMSPREE_ENDPOINT, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Success message
+                    alert(
+                        document.documentElement.lang === 'fr' ? 'Merci! Votre message a été envoyé. Nous vous contacterons bientôt.' :
+                        document.documentElement.lang === 'ar' ? 'شكراً! تم إرسال رسالتك. سنتواصل معك قريباً.' :
+                        'Thank you! Your message has been sent. We will contact you soon.'
+                    );
+                    this.reset();
+                } else {
+                    // Error message
+                    alert(
+                        document.documentElement.lang === 'fr' ? 'Désolé, une erreur s\'est produite. Veuillez réessayer ou nous appeler directement.' :
+                        document.documentElement.lang === 'ar' ? 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى أو الاتصال بنا مباشرة.' :
+                        'Sorry, an error occurred. Please try again or call us directly.'
+                    );
+                }
+            })
+            .catch(error => {
+                // Network error
                 alert(
-                    document.documentElement.lang === 'fr' ? 'Merci! Votre message a été envoyé. Nous vous contacterons bientôt.' :
-                    document.documentElement.lang === 'ar' ? 'شكراً! تم إرسال رسالتك. سنتواصل معك قريباً.' :
-                    'Thank you! Your message has been sent. We will contact you soon.'
+                    document.documentElement.lang === 'fr' ? 'Erreur de connexion. Veuillez vérifier votre connexion internet.' :
+                    document.documentElement.lang === 'ar' ? 'خطأ في الاتصال. يرجى التحقق من اتصال الإنترنت.' :
+                    'Connection error. Please check your internet connection.'
                 );
-                this.reset();
-                
+            })
+            .finally(() => {
                 // Reset button
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-            }, 2000);
+            });
         });
-
+    
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
             changeLanguage('fr');
@@ -1208,33 +1237,12 @@
                     }
                 });
             });
-
-            // Update form action with actual Formspree endpoint
-            const contactForm = document.getElementById('contactForm');
-            if (contactForm && FORMSPREE_ENDPOINT !== "https://formspree.io/f/xvgwnnve") {
-                contactForm.action = FORMSPREE_ENDPOINT;
-            }
-
-            // Update WhatsApp links with actual number
-            const whatsappLinks = document.querySelectorAll('a[href*="wa.me"]');
-            whatsappLinks.forEach(link => {
-                link.href = `https://wa.me/${WHATSAPP_NUMBER}`;
-            });
-
-            // Update call links with actual number
-            const callLinks = document.querySelectorAll('a[href^="tel:"]');
-            callLinks.forEach(link => {
-                link.href = `tel:${WHATSAPP_NUMBER}`;
-            });
         });
-
-        // Simulate capacity changes (for demo purposes)
-        // In real implementation, this would connect to your backend
+    
+        // Simulate capacity changes
         setInterval(() => {
-            // This is just for demo - in real use, you'd update capacity manually
-            // through your admin panel
-            console.log('Capacity check - in real implementation, this would fetch from your API');
-        }, 300000); // Check every 5 minutes
+            console.log('Capacity check running...');
+        }, 300000);
     </script>
 </body>
 </html>
