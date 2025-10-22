@@ -979,7 +979,7 @@
 
     <!-- Floating Buttons -->
     <div class="floating-buttons">
-        <a href="https://wa.me/213551617114" class="whatsapp-float" target="_blank">
+        <a href="https://wa.me/213XXXXXXX" class="whatsapp-float" target="_blank">
             <i class="fab fa-whatsapp"></i>
             <span data-fr="WhatsApp" data-ar="واتساب" data-en="WhatsApp">WhatsApp</span>
         </a>
